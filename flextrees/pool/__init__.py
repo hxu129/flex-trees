@@ -76,7 +76,9 @@ from flextrees.pool.primitives_fedgbdt import train_n_estimators
 
 # Primitives and aggregation functions for DTFL
 from flextrees.pool.primitives_dtfl import init_server_model_dtfl
-from flextrees.pool.primitives_dtfl import deploy_server_model_dtfl
+from flextrees.pool.primitives_dtfl import deploy_server_model
+from flextrees.pool.primitives_dtfl import deploy_local_model_config_dtfl
+from flextrees.pool.primitives_dtfl import train_local_model
 from flextrees.pool.primitives_dtfl import train_dtfl
 from flextrees.pool.primitives_dtfl import collect_clients_weights_dtfl
 from flextrees.pool.primitives_dtfl import set_aggregated_weights_dtfl
@@ -84,12 +86,13 @@ from flextrees.pool.primitives_dtfl import set_local_trees_to_server
 from flextrees.pool.primitives_dtfl import evaluate_server_model_dtfl
 from flextrees.pool.primitives_dtfl import get_classes_branches
 from flextrees.pool.primitives_dtfl import send_all_trees_to_client
-from flextrees.pool.primitives_dtfl import deploy_global_model_dtfl
-from flextrees.pool.primitives_dtfl import collect_clients_trees_dtfl
-from flextrees.pool.primitives_dtfl import evaluate_global_model_dtfl_on_client
+from flextrees.pool.primitives_dtfl import deploy_global_model
+from flextrees.pool.primitives_dtfl import collect_clients_trees
+# from flextrees.pool.primitives_dtfl import evaluate_global_model_on_client
+from flextrees.pool.primitives_dtfl import evaluate_global_model
 from flextrees.pool.primitives_dtfl import evaluate_global_trees
-from flextrees.pool.primitives_dtfl import collect_local_evaluations_from_clients_dtfl
-from flextrees.pool.primitives_dtfl import set_selected_trees_to_server_dtfl
+from flextrees.pool.primitives_dtfl import collect_local_evaluations_from_clients
+from flextrees.pool.primitives_dtfl import set_selected_trees_to_server
 from flextrees.pool.aggregators_dtfl import aggregate_dtfl
 from flextrees.pool.aggregators_dtfl import aggregate_dtfl_prunning
 from flextrees.pool.aggregators_dtfl import aggregate_client_dts

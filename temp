@@ -1,0 +1,164 @@
+Results will be saved to: results_icdtafl/results_adult_cart_clients5_iid_20250417_010039.csv
+Loading dataset: adult
+Loaded features: ['x0', 'x1', 'x2', 'x3', 'x4', 'x5', 'x6', 'x7', 'x8', 'x9', 'x10', 'x11', 'x12', 'x13', 'x14', 'x15', 'x16', 'x17', 'x18', 'x19', 'x20', 'x21', 'x22', 'x23', 'x24', 'x25', 'x26', 'x27', 'x28', 'x29', 'x30', 'x31', 'x32', 'x33', 'x34', 'x35', 'x36', 'x37', 'x38', 'x39', 'x40', 'x41', 'x42', 'x43', 'x44', 'x45', 'x46', 'x47', 'x48', 'x49', 'x50', 'x51', 'x52', 'x53', 'x54', 'x55', 'x56', 'x57', 'x58', 'x59', 'x60', 'x61', 'x62', 'x63', 'x64', 'x65', 'x66', 'x67', 'x68', 'x69', 'x70', 'x71', 'x72', 'x73', 'x74', 'x75', 'x76', 'x77', 'x78', 'x79', 'x80', 'x81', 'x82', 'x83', 'x84', 'x85', 'x86', 'x87', 'x88', 'x89', 'x90', 'x91', 'x92', 'x93', 'x94', 'x95', 'x96', 'x97', 'x98', 'x99', 'x100', 'x101', 'x102', 'x103', 'x104', 'x105', 'x106', 'x107', 'label']
+
+Federating data (iid distribution across 5 clients)...
+Data federated.
+
+Initializing Federated Pool...
+Federated Pool initialized.
+Number of clients: 5
+Number of aggregators: 1
+Number of servers: 1
+
+--- Starting Training Pipeline ---
+Step 1: Deploying config and training local models...
+Results on client. Acc: 0.8464912280701754. F1_macro: 0.7636185905980628. Len of data: 3646, Len of test data: 912
+              precision    recall  f1-score   support
+
+           0       0.95      0.86      0.90       765
+           1       0.52      0.79      0.62       147
+
+    accuracy                           0.85       912
+   macro avg       0.74      0.82      0.76       912
+weighted avg       0.88      0.85      0.86       912
+
+Feature types: ['int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int']
+Estimators: DecisionTreeClassifier(max_depth=5, min_samples_split=91, random_state=42)
+AQUÍr
+Results on client. Acc: 0.8355263157894737. F1_macro: 0.76877987438392. Len of data: 3646, Len of test data: 912
+              precision    recall  f1-score   support
+
+           0       0.94      0.85      0.89       739
+           1       0.55      0.79      0.64       173
+
+    accuracy                           0.84       912
+   macro avg       0.75      0.82      0.77       912
+weighted avg       0.87      0.84      0.85       912
+
+Feature types: ['int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int']
+Estimators: DecisionTreeClassifier(max_depth=5, min_samples_split=91, random_state=42)
+AQUÍr
+Results on client. Acc: 0.8464912280701754. F1_macro: 0.7372839506172839. Len of data: 3646, Len of test data: 912
+              precision    recall  f1-score   support
+
+           0       0.97      0.85      0.91       800
+           1       0.43      0.82      0.57       112
+
+    accuracy                           0.85       912
+   macro avg       0.70      0.84      0.74       912
+weighted avg       0.91      0.85      0.87       912
+
+Feature types: ['int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int']
+Estimators: DecisionTreeClassifier(max_depth=5, min_samples_split=91, random_state=42)
+AQUÍr
+Results on client. Acc: 0.8497807017543859. F1_macro: 0.7572842504006605. Len of data: 3646, Len of test data: 912
+              precision    recall  f1-score   support
+
+           0       0.96      0.86      0.91       775
+           1       0.50      0.77      0.61       137
+
+    accuracy                           0.85       912
+   macro avg       0.73      0.82      0.76       912
+weighted avg       0.89      0.85      0.86       912
+
+Feature types: ['int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int']
+Estimators: DecisionTreeClassifier(max_depth=5, min_samples_split=91, random_state=42)
+AQUÍr
+Results on client. Acc: 0.8432017543859649. F1_macro: 0.764598431450412. Len of data: 3646, Len of test data: 912
+              precision    recall  f1-score   support
+
+           0       0.96      0.85      0.90       762
+           1       0.51      0.81      0.63       150
+
+    accuracy                           0.84       912
+   macro avg       0.74      0.83      0.76       912
+weighted avg       0.88      0.84      0.86       912
+
+Feature types: ['int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int']
+Estimators: DecisionTreeClassifier(max_depth=5, min_samples_split=91, random_state=42)
+AQUÍr
+Step 1: Local models trained and rules extracted.
+
+Step 2-5: Filtering weak decision trees...
+  - Server collected local trees.
+  - Server sent trees to clients for evaluation.
+  - Clients evaluated trees.
+  - Server collecting evaluations.
+  - Applying filter: mean
+Using mean as threshold.
+Number of selected trees: 2
+Step 2-5: Filtering complete. Selected 2 trees (Indices: [0, 1]).
+
+Step 6-9: Aggregating rules and building global model...
+  - Collected rules from clients (will be filtered by aggregator).
+Estimators: None
+Iteration 1: 17 conjunctions
+
+Las reglas actuales son: 
+Conjunction set length: 67
+Conjunction set length after removing duplicates: 67
+branches df aggreagator is not null:     0_upper  ...                                      probas
+0       inf  ...  [0.9785814511281148, 0.021418548871885185]
+1       inf  ...   [0.49003856041131105, 0.5099614395886889]
+2       inf  ...    [0.9348661466182075, 0.0651338533817924]
+3       inf  ...   [0.6567052270779777, 0.34329477292202226]
+4       inf  ...      [0.5039274493002, 0.49607255069980005]
+..      ...  ...                                         ...
+62      inf  ...   [0.7018716577540107, 0.29812834224598933]
+63      inf  ...   [0.5344827586206896, 0.46551724137931033]
+64      inf  ...                                  [0.0, 1.0]
+65      inf  ...                                  [0.1, 0.9]
+66      inf  ...                                [0.25, 0.75]
+
+[67 rows x 219 columns]
+  - Aggregated rules from selected trees.
+Step 6-9: Global model created and set on server.
+
+--- Server Evaluation ---
+Results on test data at server level.
+Accuracy: 0.8455317842153751
+Macro F1: 0.7594455869496308
+Classificarion report: 
+               precision    recall  f1-score   support
+
+           0       0.86      0.95      0.90      7442
+           1       0.76      0.52      0.62      2327
+
+    accuracy                           0.85      9769
+   macro avg       0.81      0.73      0.76      9769
+weighted avg       0.84      0.85      0.83      9769
+
+Server evaluation complete.
+
+--- Client Evaluation of Global Model ---
+  - Deployed global model to clients.
+Results on clients test data that improves local results.
+	Len of test data on client: 912
+	Accuracy global model on test data: 0.8530701754385965
+	Accuracy with local model: 0.8464912280701754
+	Macro F1 global model on test data: 0.7764166062921249
+	F1 macro with local model: 0.7636185905980628
+Results on clients test data that improves local results.
+	Len of test data on client: 912
+	Accuracy global model on test data: 0.8541666666666666
+	Accuracy with local model: 0.8464912280701754
+	Macro F1 global model on test data: 0.7612203557993082
+	F1 macro with local model: 0.7372839506172839
+Results on clients test data that improves local results.
+	Len of test data on client: 912
+	Accuracy global model on test data: 0.8552631578947368
+	Accuracy with local model: 0.8497807017543859
+	Macro F1 global model on test data: 0.7706219942533554
+	F1 macro with local model: 0.7572842504006605
+Results on clients test data that improves local results.
+	Len of test data on client: 912
+	Accuracy global model on test data: 0.8530701754385965
+	Accuracy with local model: 0.8432017543859649
+	Macro F1 global model on test data: 0.7822939231558546
+	F1 macro with local model: 0.764598431450412
+Client evaluation complete.
+Detailed results saved in: results_icdtafl/results_adult_cart_clients5_iid_20250417_010039.csv
+Explanations (if generated) might be in: explanations_icdtafl (check primitives_dtfl.py for exact path logic)
+
+--- ICDTA4FL Demo Finished ---

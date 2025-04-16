@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import entropy
 
-from dtfl.utils.utils_trees import Node
+from flextrees.utils.utils_trees import Node
 
 from sklearn.exceptions import NotFittedError
 
@@ -113,9 +113,9 @@ class C45Tree:
         # Calculate information gain for the feature
         feature_values = [X[x][feature_id] for x in x_ids]
         feature_set_values = list(set(feature_values))
-        print("Antes subset")
+        # print("Antes subset")
         subsets = {val: [x for x in x_ids if X[x][feature_id] == val] for val in feature_set_values}
-        print("Después subset")
+        # print("Después subset")
         # Information gain calculation
         entropy_before = self.__entropy(y, x_ids)
         weighted_entropy_after = sum(
@@ -321,7 +321,7 @@ class C45Tree:
         self.__feature_names = feature_names if feature_names else list(range(X.shape[1]))
         if feature_types:
             self.__feature_types = feature_types
-        print(self.__feature_types)
+        # print(self.__feature_types)
         self.__node = self.__build_tree(self.__node, X, y, x_ids, features_ids, 0)
         # self.__build_tree(self.__node, X, y, x_ids, features_ids, 1)
         self.__is_fitted = True

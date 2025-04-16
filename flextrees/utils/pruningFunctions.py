@@ -2,8 +2,9 @@ import numpy as np
 from sklearn.metrics import auc, roc_curve
 from sklearn.tree import DecisionTreeClassifier
 
-from dtfl.utils.utils_trees import ID3Classifier, NewID3Classifier
-from dtfl.utils.c45_tree import C45Tree
+# from flextrees.utils.utils_trees import ID3Classifier, NewID3Classifier
+from flextrees.utils.utils_trees import ID3Classifier
+from flextrees.utils.c45_tree import C45Tree
 
 """
 Funciones para elegir aquellos nodos del árbol que obtienen mejor auc sobre los datos para elegir
@@ -86,7 +87,8 @@ def reduce_error_pruning(model, validation_x, validation_y, min_size, classes_):
         return reduce_error_pruning_sklearn(
             model, validation_x, validation_y, min_size, classes_
         )
-    elif isinstance(model[0], ID3Classifier) or isinstance(model[0], NewID3Classifier):
+    # elif isinstance(model[0], ID3Classifier) or isinstance(model[0], NewID3Classifier):
+    elif isinstance(model[0], ID3Classifier):
         return reduce_error_pruning_id3(
             model, validation_x, validation_y, min_size, classes_
         )

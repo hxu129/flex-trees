@@ -2,7 +2,7 @@ import sys
 import random
 from copy import deepcopy
 
-from dtfl.utils.save_results import client_write_results, print_results_client
+from flextrees.utils.save_results import client_write_results, print_results_client
 
 from flex.pool.decorators import (
     collect_clients_weights,
@@ -80,24 +80,36 @@ def train_local_model(client_flex_model, client_data, *args, **kwargs):
     from sklearn.tree import DecisionTreeClassifier
     from sklearn.model_selection import train_test_split
     from sklearn.metrics import accuracy_score, f1_score
-    from dtfl.utils.utils_trees import ID3Classifier
-    from dtfl.utils.c45_tree import C45Tree
+    from flextrees.utils.utils_trees import ID3Classifier
+    from flextrees.utils.c45_tree import C45Tree
+    clf = None
     if client_flex_model['local_model_params']['model_type'] == 'c45':
-        model = C45Tree
+        clf = C45Tree(
+            random_state=42,
+            min_samples_split=max(1.0, int(0.02 * len(client_data.X_data))),
+            max_depth=client_flex_model['local_model_params']['max_depth'],
+            criterion=client_flex_model['local_model_params']['criterion'],
+            splitter=client_flex_model['local_model_params']['splitter'],
+            improve_speed=False, # This is for the C45Tree
+        )
     elif client_flex_model['local_model_params']['model_type'] == 'id3':
-        model = ID3Classifier
+        clf = ID3Classifier(
+            random_state=42,
+            min_samples_split=max(1.0, int(0.02 * len(client_data.X_data))),
+            max_depth=client_flex_model['local_model_params']['max_depth'],
+            criterion=client_flex_model['local_model_params']['criterion'],
+            splitter=client_flex_model['local_model_params']['splitter']
+        )
     else:
-        model = DecisionTreeClassifier
+        clf = DecisionTreeClassifier(
+            random_state=42,
+            min_samples_split=max(1.0, int(0.02 * len(client_data.X_data))),
+            max_depth=client_flex_model['local_model_params']['max_depth'],
+            criterion=client_flex_model['local_model_params']['criterion'],
+            splitter=client_flex_model['local_model_params']['splitter']
+        )
     # model = ID3Classifier if client_flex_model['local_model_params']['model_type'] == 'id3' else DecisionTreeClassifier  # noqa: E501
 
-    clf = model(
-        random_state=42,
-        min_samples_split=max(1.0, int(0.02 * len(client_data.X_data))),
-        max_depth=client_flex_model['local_model_params']['max_depth'],
-        criterion=client_flex_model['local_model_params']['criterion'],
-        splitter=client_flex_model['local_model_params']['splitter'],
-        improve_speed=False, # This is for the C45Tree
-    )
     X_data, y_data = client_data.X_data.to_numpy(), client_data.y_data.to_numpy()
     X_data, X_test, y_data, y_test = train_test_split(X_data, y_data, test_size=0.2)  # noqa: E501
     # feature_types = ['str'] * len(X_data[0])
@@ -115,7 +127,7 @@ def train_local_model(client_flex_model, client_data, *args, **kwargs):
     from sklearn import metrics
     print(metrics.classification_report(y_pred, y_test))
     # print(metrics.classification_report(y_pred_cart, y_test))
-    from dtfl.utils.ConjunctionSet import ConjunctionSet
+    from flextrees.utils.ConjunctionSet import ConjunctionSet
     feature_names = [f'x{i}' for i in range(X_data.shape[1])]
 
     validation_data = X_data
@@ -321,13 +333,7 @@ def evaluate_global_model(
         rows_list.append(dict_explanations)
     df_explanations = pd.DataFrame(rows_list)
     # Save the explanations to a file. MacOs for my laptop, Windows for my desktop.
-    if sys.platform == "darwin":
-        # MacOS
-        df_explanations_folder = "~/Documents/UGR-Work/ArticuloTesis/DTFL/explanations_folder"
-    elif sys.platform == "win32":
-        # Windows
-        df_explanations_folder = "C:/Users/Cris/Documents/Alberto/Tesis/DTFL/explanations_folder"
-    # df_explanations_folder = "C:/Users/Cris/Documents/Alberto/Tesis/DTFL/explanations_folder"
+    df_explanations_folder = "explanations"
     df_explanations.to_csv(f"{df_explanations_folder}/explanation_{client_id}.csv", index=False, index_label=False)
 
 

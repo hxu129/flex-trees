@@ -5,12 +5,12 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from statsmodels.distributions.empirical_distribution import ECDF
 
-from dtfl.utils.Branch import Branch
-from dtfl.utils.branch_categorical import BranchCategorical
-from dtfl.utils.branch_mixed import BranchMixed
-from dtfl.utils.pruningFunctions import *
-from dtfl.utils.utils_trees import ID3Classifier
-from dtfl.utils.c45_tree import C45Tree
+from flextrees.utils.Branch import Branch
+from flextrees.utils.branch_categorical import BranchCategorical
+from flextrees.utils.branch_mixed import BranchMixed
+from flextrees.utils.pruningFunctions import *
+from flextrees.utils.utils_trees import ID3Classifier
+from flextrees.utils.c45_tree import C45Tree
 
 
 class ConjunctionSet:

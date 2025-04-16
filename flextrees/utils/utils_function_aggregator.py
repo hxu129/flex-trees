@@ -6,7 +6,7 @@ def generate_cs_dt_branches_from_list(client_cs, classes_, tree_model, threshold
     """Function that generate a global ConjuctionSet, a GlobalTree and the branches
     associated to the tree in the server node.
     """
-    from dtfl.utils.ConjunctionSet import ConjunctionSet
+    from flextrees.utils.ConjunctionSet import ConjunctionSet
 
     cs = ConjunctionSet(
         filter_approach="entropy",

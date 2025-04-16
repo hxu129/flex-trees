@@ -5,9 +5,9 @@ from flex.pool.decorators import aggregate_weights
 def aggregate_dtfl(list_of_weights: list, *args, **kwargs):
     """Function that aggregate the rules from the clients
     """
-    from dtfl.utils.utils_function_aggregator import generate_cs_dt_branches_from_list
-    from dtfl.utils.branch_tree import TreeBranch
-    from dtfl.utils.branch_tree_categorical import TreeBranchCategorical
+    from flextrees.utils.utils_function_aggregator import generate_cs_dt_branches_from_list
+    from flextrees.utils.branch_tree import TreeBranch
+    from flextrees.utils.branch_tree_categorical import TreeBranchCategorical
 
     classes_ = set()
     features_ = set()
@@ -27,10 +27,10 @@ def aggregate_dtfl_prunning(list_of_weights: list, *args, **kwargs):
     """Function that aggregate the rules from the clients
     """
     list_of_weights = [client for i, client in enumerate(list_of_weights) if i in kwargs['selected_indexes']]
-    from dtfl.utils.utils_function_aggregator import generate_cs_dt_branches_from_list
-    from dtfl.utils.branch_tree import TreeBranch
-    from dtfl.utils.branch_tree_categorical import TreeBranchCategorical
-    from dtfl.utils.branch_tree_mixed import TreeBranchMixed
+    from flextrees.utils.utils_function_aggregator import generate_cs_dt_branches_from_list
+    from flextrees.utils.branch_tree import TreeBranch
+    from flextrees.utils.branch_tree_categorical import TreeBranchCategorical
+    from flextrees.utils.branch_tree_mixed import TreeBranchMixed
 
     classes_ = set()
     features_ = set()
@@ -38,6 +38,7 @@ def aggregate_dtfl_prunning(list_of_weights: list, *args, **kwargs):
     features_ |= {fe for client in list_of_weights for fe in client[2].columns if 'upper' or 'lower' in fe}
     classes_ = list(classes_)
     # breakpoint()
+    # print(features_)
     features_.remove('probas')
     features_ = list(set(features_)) # This param will be used in a future for VFL. Still need some coding to match the features correctly.
     client_cs = [cs[0] for cs in list_of_weights]
