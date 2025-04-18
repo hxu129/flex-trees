@@ -32,8 +32,8 @@ class ConjunctionSet:
     ):
         print(f"Estimators: {estimators}")
         self.amount_of_branches_threshold = amount_of_branches_threshold
-        self.model = model  # Lista de árboles
-        self.model_estimators = estimators  # Solo sirve para mantenerla el total de árboles que se utilizan aquí.
+        self.model = model  # list of trees
+        self.model_estimators = estimators  # Only used to keep track of the total number of trees used here.
         self.feature_names = feature_names
         self.exclusion_threshold = exclusion_threshold
         self.filter_approach = filter_approach
@@ -44,8 +44,8 @@ class ConjunctionSet:
         self._personalized = personalized
         self.conjunctionSet = None
         self.branches_lists = []
-        # Variable para mantener las reglas individuales de todos los clientes.
-        # Se añadirán estas reglas a las agregadas.
+        # Variable to keep the individual rules of all clients.
+        # These rules will be added to the aggregated ones.
         self.__global_CS = []
         if (
             self.model is not None
@@ -68,10 +68,10 @@ class ConjunctionSet:
             # print(self.feature_model)
             self.set_ecdf(
                 original_data
-            )  # ARREGLAR A PARTIR DE AQUÍ YA QUE USA LOS DATOS ORIGINALES (¿¿USAR MEJOR LOS
-            # DATOS DE VALIDACIÓN??)
-            # Se necesitan los datos originales para generar los Branches, así que una opción es generar en cada cliente
-            # los branches para así generar en el servidor el árbol final.
+            )  
+            # TODO: fix from here onwards since it uses the original data (¿¿use better the validation data??)
+            # We need the original data to generate the branches, so one option is to generate the branches in each client
+            # and then generate the final tree in the server.
             # self.get_ranges(original_data)
             self.generateBranches()
             self.calculate_branches_probability()
@@ -480,9 +480,9 @@ class ConjunctionSet:
         self.ecdf_dict = {
             i: ECDF(data.transpose()[i]) for i in range(len(self.feature_names))
         }  # NEW
-        # El cambio se hace porque con data.transpose().T se obtiene de nuevo data, y por tanto no se podría
-        # realizar el for que se está aplicando, a no ser que se tuvieran el mismo número de características
-        # que de instancias para poder recorrer correctamente el for.
+        # The change is made because with data.transpose().T we get again data, and therefore we cannot perform the
+        # for that is being applied, unless we have the same number of features as instances to be able to traverse
+        # the for correctly.
 
     """
     def group_by_label_probas(self, conjunctionSet):

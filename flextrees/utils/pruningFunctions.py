@@ -62,6 +62,14 @@ def predict_instance_with_included_tree(model, included_indexes, inst, classes_)
 
 # def select_index(rf,current_indexes,validation_x,validation_y): # OLD
 def select_index(rf, current_indexes, validation_x, validation_y, classes_):  # NEW
+    """Function to select the best tree from the forest.
+    Args:
+        rf (list): List containing all the models to prune
+        current_indexes (list): List containing the indexes of the trees to keep
+        validation_x (np object): Training data
+        validation_y (np object): Training labels
+        classes_ (list): List of all the classes in the problem. Important to
+    """
     options_auc = {}
     for i, tree in enumerate(rf):  # NEW
         if rf[i] in current_indexes:  # NEW AUX. Keeping this line until above line work
@@ -81,7 +89,14 @@ def select_index(rf, current_indexes, validation_x, validation_y, classes_):  # 
 # def reduce_error_pruning(model,validation_x,validation_y,min_size): # OLD
 def reduce_error_pruning(model, validation_x, validation_y, min_size, classes_):  # NEW
     """
-    Función que coge todos los árboles de los clientes y elimina aquellos redundantes.
+    Function that takes all the trees from the clients and eliminates the redundant ones.
+    Args:
+        model (list): List containing all the models to prune
+        validation_x (np object): Training data
+        validation_y (np object): Training labels
+        min_size (int): Minimal size of the forest
+        classes_ (list): List of all the classes in the problem. Important to
+        use because of the non-IID distribution.
     """
     if isinstance(model[0], DecisionTreeClassifier):
         return reduce_error_pruning_sklearn(
@@ -144,7 +159,7 @@ def reduce_error_pruning_id3(model, validation_x, validation_y, min_size, classe
     """
     """
     best_auc,current_indexes = select_index(model,[],validation_x,validation_y, classes_)
-    # while len(current_indexes) <= model.n_estimators: # TODO: Modificar para adaptar a len(models) o models[i]
+    # while len(current_indexes) <= model.n_estimators: # TODO: modify to adapt to len(models) or models[i]
     assert min_size <= len(model)
     while len(current_indexes) <= len(model):
         new_auc, new_current_indexes = select_index(model, current_indexes,
