@@ -23,6 +23,61 @@ warnings.filterwarnings('ignore')
 
 # 为了简化，我们将从原始代码中抽取核心函数
 
+# 添加这个新函数来打印决策树规则
+def print_tree_rules(tree, feature_names=None, prefix="", branches_df=None):
+    """递归打印决策树的规则"""
+    if tree.left is None and tree.right is None:
+        # 叶节点，打印类别分布
+        if branches_df is not None and hasattr(tree, 'node_probas'):
+            probas = tree.node_probas(branches_df)
+        else:
+            # 如果没有分支数据框或没有node_probas方法，尝试访问tree.label_probas
+            probas = getattr(tree, 'label_probas', [0, 0])
+            
+        predicted_class = np.argmax(probas)
+        print(f"{prefix}→ 预测类别: {predicted_class} (概率: {probas})")
+        return
+    
+    # 获取特征名称
+    feature = f"特征{tree.split_feature}" if feature_names is None else feature_names[tree.split_feature]
+    
+    # 打印左子树规则
+    print(f"{prefix}如果 {feature} <= {tree.split_value}")
+    print_tree_rules(tree.left, feature_names, prefix + "  ", branches_df)
+    
+    # 打印右子树规则
+    print(f"{prefix}如果 {feature} > {tree.split_value}")
+    print_tree_rules(tree.right, feature_names, prefix + "  ", branches_df)
+
+# 添加这个函数来提取并打印ConjunctionSet规则
+def print_conjunction_rules(cs, feature_names=None):
+    """打印ConjunctionSet中的规则"""
+    print("规则集中包含以下规则:")
+    for i, branch in enumerate(cs.conjunctionSet):
+        rule_str = f"规则 {i+1}: "
+        
+        # 添加上限条件 (features_upper)
+        for feature, threshold in enumerate(branch.features_upper):
+            if threshold != np.inf:  # 如果不是无穷大，表示有上限条件
+                feature_name = f"特征{feature}" if feature_names is None else feature_names[feature]
+                rule_str += f"{feature_name} <= {threshold:.4f} AND "
+        
+        # 添加下限条件 (features_lower)
+        for feature, threshold in enumerate(branch.features_lower):
+            if threshold != -np.inf:  # 如果不是负无穷大，表示有下限条件
+                feature_name = f"特征{feature}" if feature_names is None else feature_names[feature]
+                rule_str += f"{feature_name} > {threshold:.4f} AND "
+        
+        # 移除最后的 " AND "
+        if rule_str.endswith(" AND "):
+            rule_str = rule_str[:-5]
+            
+        # 添加预测类别
+        predicted_class = np.argmax(branch.label_probas)
+        rule_str += f" → 类别: {predicted_class} (概率: {branch.label_probas[predicted_class]:.4f})"
+        
+        print(rule_str)
+
 # 1. 数据相关函数
 def load_dataset(dataset_name='adult', categorical=False):
     """加载指定的数据集"""
@@ -117,14 +172,14 @@ def split_data_to_clients(data, n_clients=5, iid=True):
     return client_data
 
 # 2. 树训练和规则提取函数
-def train_local_model(client_data, model_params):
+def train_local_model(client_data, model_params, random_state=42):
     """在本地训练决策树并提取规则"""
     # 根据模型类型创建分类器
     model_type = model_params.get('model_type', 'cart')
     
     # 创建分类器，这里简化只使用CART决策树
     clf = DecisionTreeClassifier(
-        random_state=42,
+        random_state=random_state,
         min_samples_split=max(1.0, int(0.02 * len(client_data.X_data))),
         max_depth=model_params.get('max_depth', 5),
         criterion=model_params.get('criterion', 'gini'),
@@ -203,21 +258,21 @@ def filter_trees(evaluation_results, filter_params):
     # 根据筛选方法确定阈值
     filter_method = filter_params.get('filter_method', 'mean')
     if filter_method == 'mean':
-        acc_threshold = np.mean(avg_results[0])
-        f1_threshold = np.mean(avg_results[1])
+        acc_threshold = np.mean(avg_results[:, 0])
+        f1_threshold = np.mean(avg_results[:, 1])
     elif filter_method == 'percentile':
         percentile_value = filter_params.get('filter_value', 75)
-        acc_threshold = np.percentile(avg_results[0], percentile_value)
-        f1_threshold = np.percentile(avg_results[1], percentile_value)
-    else:
-        # 默认使用固定阈值
-        acc_threshold = filter_params.get('acc_threshold', 0.6)
-        f1_threshold = filter_params.get('f1_threshold', 0.5)
+        acc_threshold = np.percentile(avg_results[:, 0], percentile_value)
+        f1_threshold = np.percentile(avg_results[:, 1], percentile_value)
+    # else:
+    #     # 默认使用固定阈值
+    acc_threshold = filter_params.get('acc_threshold', 0.6)
+    f1_threshold = filter_params.get('f1_threshold', 0.5)
     
     # 筛选满足条件的树索引
     selected_indices = []
-    for i in range(len(avg_results[0])):
-        if avg_results[0][i] >= acc_threshold and avg_results[1][i] >= f1_threshold:
+    for i in range(len(avg_results)):
+        if avg_results[i][0] >= acc_threshold and avg_results[i][1] >= f1_threshold:
             selected_indices.append(i)
     
     # 如果没有树被选中，选择表现最好的一棵
@@ -295,10 +350,10 @@ def get_classes_branches(branches):
 # 主函数
 def main():
     # 配置参数
-    N_CLIENTS = 5  # 客户端数量
+    N_CLIENTS = 2  # 客户端数量
     DATA_DISTRIBUTION = 'iid'  # 'iid' 或 'non-iid'
     MODEL_TYPE = 'cart'  # 模型类型，简化版只实现'cart'
-    MAX_DEPTH = 5  # 决策树最大深度
+    MAX_DEPTH = 2  # 决策树最大深度
     
     # 筛选参数
     FILTERING_METHOD = 'mean'  # 筛选方法
@@ -327,9 +382,28 @@ def main():
     client_models = []
     for i, data in enumerate(client_data):
         print(f"\n客户端 {i+1} 训练中...")
-        model = train_local_model(data, local_model_params)
+        model = train_local_model(data, local_model_params, random_state=i)
         client_models.append(model)
     print("第1步: 本地模型训练完成，规则已提取")
+    
+    # 打印每个客户端的决策树规则
+    print("\n== 打印每个客户端的决策树规则 ==")
+    for i, client_model in enumerate(client_models):
+        print(f"\n客户端 {i+1} 的决策树规则:")
+        local_tree = client_model['local_tree']
+        feature_names = [f'特征{i}' for i in range(len(client_data[i].X_data.columns))]
+        
+        # 打印CART决策树规则（使用sklearn的文本表示）
+        print("CART决策树规则:")
+        try:
+            from sklearn import tree as sk_tree
+            print(sk_tree.export_text(local_tree, feature_names=feature_names))
+        except Exception as e:
+            print(f"无法打印决策树文本表示: {e}")
+        
+        # 打印规则集
+        print(f"\n客户端 {i+1} 的规则集:")
+        print_conjunction_rules(client_model['local_cs'], feature_names=feature_names)
     
     # 5. 评估所有客户端上的所有树
     print("\n第2-5步: 筛选弱决策树...")
@@ -352,6 +426,20 @@ def main():
     print("\n第6-9步: 聚合规则并构建全局模型...")
     global_model = aggregate_rules(client_models, selected_indices)
     print("全局模型构建完成")
+    
+    # 打印全局树规则
+    print("\n== 打印全局树规则 ==")
+    # 全局树是global_model[1]，ConjunctionSet是global_model[0]，branches_df是global_model[2]
+    global_tree = global_model[1]
+    global_cs = global_model[0]
+    branches_df = global_model[2]
+    feature_names = [f'特征{i}' for i in range(len(client_data[0].X_data.columns))]
+    
+    print("全局决策树规则:")
+    print_tree_rules(global_tree, feature_names=feature_names, branches_df=branches_df)
+    
+    print("\n全局规则集:")
+    print_conjunction_rules(global_cs, feature_names=feature_names)
     
     # 8. 评估全局模型
     print("\n第10步: 评估全局模型...")

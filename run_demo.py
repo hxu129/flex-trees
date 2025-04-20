@@ -7,7 +7,6 @@ Demo: Interpretable Client Decision Tree Aggregation (ICDTA4FL) with FLEXible
 This script demonstrates the ICDTA4FL process using the `flex-trees` library, based on the paper
 "An interpretable client decision tree aggregation process for Federated Learning".
 """
-
 # Import necessary libraries from `flex`, `flextrees`, and standard Python packages.
 import numpy as np
 import os
@@ -46,7 +45,7 @@ from flextrees.pool import (
 
 # Configuration parameters
 # Experiment Parameters
-N_CLIENTS = 5 # Number of clients (e.g., 2, 5, 10, 20, 50)
+N_CLIENTS = 2 # Number of clients (e.g., 2, 5, 10, 20, 50)
 DATASET_FUNC = adult # Choose dataset function (nursery, adult, car, credit2)
 DATA_DISTRIBUTION = 'iid' # 'iid' or 'non-iid'
 
@@ -54,7 +53,7 @@ DATA_DISTRIBUTION = 'iid' # 'iid' or 'non-iid'
 # MODEL_TYPE = 'id3'  # Choose 'id3', 'cart', or 'c45'
 MODEL_TYPE = 'cart'  # Choose 'id3', 'cart', or 'c45'
 # MODEL_TYPE = 'c45'  # Choose 'id3', 'cart', or 'c45'
-MAX_DEPTH = 5 if MODEL_TYPE == 'id3' else 5 # ID3 depth related to features, CART/C45 fixed
+MAX_DEPTH = 2 if MODEL_TYPE == 'id3' else 2 # ID3 depth related to features, CART/C45 fixed
 CRITERION = 'entropy' if MODEL_TYPE == 'id3' else 'gini'
 RULES_THRESHOLD = 99999999 # Max rules during aggregation filtering
 

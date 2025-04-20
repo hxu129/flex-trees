@@ -27,31 +27,20 @@ class TreeBranch:
         Args:
             df (Pandas.DataFrame): Dataframe with the instances of the node.
         """
-        # print(df)
-        # if np.sum(self.mask)==1 or self.has_same_class(df):
         if np.sum(self.mask) == 1:
             self.left = None
             self.right = None
             return
         self.features = [int(i.split("_")[0]) for i in df.keys() if "upper" in str(i)]
-        # print(self.features)
-        # print(f"Printing self.mask: {self.mask}")
-        # print(f"Printing len self.mask: {len(self.mask)}")
         self.split_feature, self.split_value = self.select_split_feature(df)
+        # If split value is not in df, break
+        
         self.create_mask(df)
         is_splitable = self.is_splitable()
         if is_splitable is False:
             self.left = None
             self.right = None
             return
-        # print(f"Left tree mask: {list(np.logical_and(self.mask,np.logical_or(self.left_mask,self.both_mask)))}")
-        # print(f"Left len tree mask: {len(list(np.logical_and(self.mask,np.logical_or(self.left_mask,self.both_mask))))}")
-        # print(f"Right tree mask: {list(np.logical_and(self.mask,np.logical_or(self.right_mask,self.both_mask)))}")
-        # print(f"Right len tree mask: {len(list(np.logical_and(self.mask,np.logical_or(self.right_mask,self.both_mask))))}")
-        # print(f"Both mask: {self.both_mask}")
-        # print(f"Len de both mask: {len(self.both_mask)}")
-        # print(f"Logical or entre right mask y both mask: {np.logical_or(self.right_mask,self.both_mask)}")
-        # print(f"True right mask: {self.right_mask}")
         self.left = TreeBranch(
             list(
                 np.logical_and(self.mask, np.logical_or(self.left_mask, self.both_mask))
