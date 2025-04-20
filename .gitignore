@@ -160,6 +160,7 @@ torch_datasets/
 data/
 *.csv
 *.xls
+*.png
 
 # Experimental files
 main_fedid3.py
