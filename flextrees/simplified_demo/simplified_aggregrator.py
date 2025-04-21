@@ -122,7 +122,10 @@ class SimpleConjunctionSet:
         self.classes_ = None
     
     def aggregate_branches(self, client_cs, classes_):
-        """聚合多个客户端的规则集合，用来由多个branch生成一个conjunctionSet的后续branch"""
+        """聚合多个客户端的规则集合，用来由多个branch生成一个conjunctionSet的后续branch
+        client_cs: list[list[SimpleBranch]]
+        classes_: list[str]
+        """
         self.classes_ = classes_
         self.branches_lists = []
         
@@ -151,6 +154,7 @@ class SimpleConjunctionSet:
         first_branches = self.branches_lists[0]
         if isinstance(first_branches, list) and not isinstance(first_branches[0], list):
             conjunctionSet = first_branches  # 如果是分支列表，直接使用
+            # conjunctionset is just a list of branches
         else:
             # 如果是列表的列表，扁平化
             conjunctionSet = []
@@ -448,7 +452,12 @@ class TreeBranch:
 
 # 4. 规则聚合函数
 def generate_cs_dt_branches_from_list(client_cs, classes_, tree_model, threshold=100):
-    """聚合客户端规则并构建全局模型"""
+    """聚合客户端规则并构建全局模型
+    client_cs: list[list[SimpleBranch]]
+    classes_: list[str]
+    tree_model: DecisionTreeClassifier
+    threshold: int
+    """
     # 创建规则集合对象
     cs = SimpleConjunctionSet(amount_of_branches_threshold=threshold)
     
@@ -480,6 +489,118 @@ def generate_cs_dt_branches_from_list(client_cs, classes_, tree_model, threshold
     global_tree.split(branches_dict)
     
     return [cs, global_tree, branches_df]
+
+# 比较两棵树的structural similarity
+def compare_trees(tree1, tree2, feature_names, classes_, bounds):
+    """比较两棵树的structural similarity
+    tree1: DecisionTreeClassifier
+    tree2: DecisionTreeClassifier
+    feature_names: list[str]
+    classes_: list[str]
+    bounds: list[(float, float)]
+    """
+    # 比较两个 branch 的structural similarity
+    def compare_branches(branch1, branch2, not_match_label=-1000):
+        """比较两个 branch 的structural similarity，注意这里branch不是SimpleBranch，是df的行
+        branch1: pd.Series
+        branch2: pd.Series
+        not_match_label: float, 是一个小值，表示两个branch不匹配，本来的返回值相似度应该是大值
+        """
+        # 比较两个 branch 的structural similarity
+        
+        # step 1: compare the class label
+        class_label_1 = np.argmax(branch1["probas"])
+        class_label_2 = np.argmax(branch2["probas"])
+        if class_label_1 != class_label_2:
+            return not_match_label
+    
+        overlap = 0
+        overall_range_1 = 0
+        overall_range_2 = 0
+        # step 2: compare the overlap regions and the overall range
+        for feature in range(len(feature_names)):
+            lower_1 = branch1[f"{feature}_lower"]
+            upper_1 = branch1[f"{feature}_upper"] # region: lower_1 <= x <= upper_1
+            lower_2 = branch2[f"{feature}_lower"]
+            upper_2 = branch2[f"{feature}_upper"] # region: lower_2 <= x <= upper_2
+            # calculate the overlap
+            overlap += np.max([0, np.min([upper_1, upper_2]) - np.max([lower_1, lower_2])])
+            # calculate the overall range
+            overall_range_1 += upper_1 - lower_1
+            overall_range_2 += upper_2 - lower_2
+
+        return 2 * overlap / (overall_range_1 + overall_range_2)
+
+    branches1 = extract_df_rules_from_tree(tree1, feature_names, classes_)
+    branches2 = extract_df_rules_from_tree(tree2, feature_names, classes_)
+
+    # 定义一个函数来替换无穷值
+    def replace_inf_with_bounds(series):
+        if 'prob' in series.name: # 概率值不替换
+            return series
+        column_idx, bound_type = series.name.split("_")
+        column_idx = int(column_idx)
+        if bound_type == "upper":
+            max_value = bounds[column_idx][1]
+            return series.replace([np.inf], max_value)
+        elif bound_type == "lower":
+            min_value = bounds[column_idx][0]
+            return series.replace([-np.inf], min_value)
+        else:
+            raise ValueError(f"Invalid bound type: {bound_type}")
+
+    # 对每个特征应用替换函数
+    branches1 = branches1.apply(replace_inf_with_bounds)
+    branches2 = branches2.apply(replace_inf_with_bounds)
+
+    similarity_matrix = np.zeros((len(branches1), len(branches2)))
+    for i in range(len(branches1)):
+        for j in range(len(branches2)):
+            similarity_matrix[i, j] = compare_branches(branches1.iloc[i], branches2.iloc[j])
+    
+    # 使用匈牙利算法进行匹配
+    from scipy.optimize import linear_sum_assignment
+    row_ind, col_ind = linear_sum_assignment(-1 * similarity_matrix) # minimize the cost matrix
+
+    # 计算 unmapped branches
+    unmapped_branches1_indices = set()
+    unmapped_branches2_indices = set()
+    for r,c in zip(row_ind, col_ind):
+        if similarity_matrix[r, c] <= 0:
+            unmapped_branches1_indices.add(r)
+            unmapped_branches2_indices.add(c)
+            row_ind = row_ind[np.where(row_ind != r)]
+            col_ind = col_ind[np.where(col_ind != c)]
+    print(similarity_matrix)
+    print(row_ind, col_ind)
+    print(unmapped_branches1_indices, unmapped_branches2_indices)
+
+    # 用最大可能相似度，近似计算 unmapped branches 的损失
+    penalty = 0
+    for i in unmapped_branches1_indices:
+        penalty += np.max(similarity_matrix[i])
+        print(np.max(similarity_matrix[i]))
+    for j in unmapped_branches2_indices:
+        penalty += np.max(similarity_matrix[:, j])
+        print(np.max(similarity_matrix[:, j]))
+
+    # 计算匹配的平均相似度
+    total_similarity = 0
+    for i, j in zip(row_ind, col_ind):
+        total_similarity += similarity_matrix[i, j]
+    average_similarity = 2 * (total_similarity - penalty) / (len(branches1) + len(branches2))
+    
+    return average_similarity
+
+
+# 从单独一颗树当中提取df形式的规则
+def extract_df_rules_from_tree(tree, feature_names, classes_):
+    """从决策树提取规则"""
+    branches = extract_rules_from_tree(tree, feature_names, classes_)
+    cs = SimpleConjunctionSet(feature_names=feature_names, amount_of_branches_threshold=len(branches))
+    cs.aggregate_branches([branches], classes_)
+    cs.buildConjunctionSet()
+    return cs.get_conjunction_set_df()
 
 # 5. 用于从决策树提取规则的函数
 def extract_rules_from_tree(tree, feature_names, classes_):
@@ -540,6 +661,10 @@ def run_demo():
     print("生成示例数据...")
     X, y = make_classification(n_samples=1000, n_features=4, n_classes=2, random_state=42)
     feature_names = [f"feature_{i}" for i in range(X.shape[1])]
+    # 得到每一个feature的数值上下界
+    bounds = []
+    for i in range(X.shape[1]):
+        bounds.append((X[:, i].min(), X[:, i].max()))
     
     # 划分数据集
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -555,19 +680,28 @@ def run_demo():
     # 在每个客户端训练决策树
     print("\n在各客户端训练决策树...")
     client_trees = []
-    tree_depth = 2
+    tree_depth = 1
     for i, (X_c, y_c) in enumerate(client_data):
         tree = DecisionTreeClassifier(max_depth=tree_depth, random_state=42+i)
         tree.fit(X_c, y_c)
         client_trees.append(tree)
         print(f"客户端 {i+1} 训练完成，正确率: {tree.score(X_c, y_c):.4f}")
+
+    # 计算每个客户端的树的structural similarity
+    print("\n计算每个客户端的树的structural similarity...")
+    client_similarity = []
+    for i in range(num_clients):
+        for j in range(i+1, num_clients):
+            similarity = compare_trees(client_trees[i], client_trees[j], feature_names, np.unique(y), bounds)
+            client_similarity.append((i, j, similarity))
+            print(f"客户端 {i+1} 和 客户端 {j+1} 的structural similarity: {similarity:.4f}")
     
     # 从树中提取规则
     print("\n从决策树中提取规则...")
     client_branches = []
     for i, tree in enumerate(client_trees):
         branches = extract_rules_from_tree(tree, feature_names, np.unique(y))
-        client_branches.append(branches)
+        client_branches.append(branches) # list[list[SimpleBranch]]
         print(f"客户端 {i+1} 提取了 {len(branches)} 条规则")
     
     # 显示部分规则
