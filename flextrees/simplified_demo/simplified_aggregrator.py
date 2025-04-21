@@ -4,7 +4,9 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 from scipy.stats import entropy
+from scipy.spatial.distance import jensenshannon
 from scipy.optimize import linear_sum_assignment
+
 def print_matrix(matrix):
     for row in matrix:
         print(" ".join(f"{cell:.2f}" for cell in row))
@@ -495,13 +497,15 @@ def generate_cs_dt_branches_from_list(client_cs, classes_, tree_model, threshold
     return [cs, global_tree, branches_df]
 
 # 比较两棵树的structural similarity
-def compare_trees(tree1, tree2, feature_names, classes_, bounds):
+def compare_trees(tree1, tree2, feature_names, classes_, bounds, comp_dist=False, dist_weight=0.5):
     """比较两棵树的structural similarity
     tree1: DecisionTreeClassifier
     tree2: DecisionTreeClassifier
     feature_names: list[str]
     classes_: list[str]
     bounds: list[(float, float)]
+    comp_dist: bool, 是否计算标签分布差异
+    dist_weight: float, 标签分布差异的权重
     """
     # 比较两个 branch 的structural similarity
     def compare_branches(branch1, branch2, not_match_label=-np.inf):
@@ -511,12 +515,16 @@ def compare_trees(tree1, tree2, feature_names, classes_, bounds):
         not_match_label: float, 是一个小值，表示两个branch不匹配，本来的返回值相似度应该是大值
         """
         # 比较两个 branch 的structural similarity
-        
-        # step 1: compare the class label
-        class_label_1 = np.argmax(branch1["probas"])
-        class_label_2 = np.argmax(branch2["probas"])
-        if class_label_1 != class_label_2:
-            return not_match_label
+        dist_similarity = 0
+        if comp_dist:
+            # Compare the distribution of the class labels
+            dist_similarity = jensenshannon(branch1["probas"], branch2["probas"])
+        else:
+            # step 1: compare the class label
+            class_label_1 = np.argmax(branch1["probas"])
+            class_label_2 = np.argmax(branch2["probas"])
+            if class_label_1 != class_label_2:
+                return not_match_label
     
         overlap = 0
         overall_range_1 = 0
@@ -533,7 +541,12 @@ def compare_trees(tree1, tree2, feature_names, classes_, bounds):
             overall_range_1 += upper_1 - lower_1
             overall_range_2 += upper_2 - lower_2
 
-        return 2 * overlap / (overall_range_1 + overall_range_2)
+        branch_similarity = 2 * overlap / (overall_range_1 + overall_range_2)
+
+        if comp_dist:
+            branch_similarity = dist_similarity * dist_weight + branch_similarity * (1 - dist_weight)
+
+        return branch_similarity
 
     branches1 = extract_df_rules_from_tree(tree1, feature_names, classes_)
     branches2 = extract_df_rules_from_tree(tree2, feature_names, classes_)
@@ -708,7 +721,7 @@ def run_demo():
     client_similarity = []
     for i in range(num_clients):
         for j in range(i+1, num_clients):
-            similarity = compare_trees(client_trees[i], client_trees[j], feature_names, np.unique(y), bounds)
+            similarity = compare_trees(client_trees[i], client_trees[j], feature_names, np.unique(y), bounds, comp_dist=True, dist_weight=0.5)
             client_similarity.append((i, j, similarity))
             print(f"客户端 {i+1} 和 客户端 {j+1} 的structural similarity: {similarity:.4f}")
     
@@ -744,24 +757,24 @@ def run_demo():
     
     # 显示预测结果
     print("\n预测结果示例:")
-    # print(f"训练集预测结果: {(predictions_train == y_train).mean()}")
-    # for i, (pred, exp, true) in enumerate(zip(predictions_train[:5], explanations_train[:5], y_train[:5])):
-    #     print(f"\n样本 {i+1}:")
-    #     print(f"真实类别: {true}")
-    #     print(f"预测类别: {pred}")
-    #     print(f"解释: {exp}")
-    # print()
-    # print(f"测试集预测结果: {(predictions_test == y_test).mean()}")
-    # for i, (pred, exp, true) in enumerate(zip(predictions_test[:5], explanations_test[:5], y_test[:5])):
-    #     print(f"\n样本 {i+1}:")
-    #     print(f"真实类别: {true}")
-    #     print(f"预测类别: {pred}")
-    #     print(f"解释: {exp}")
+    print(f"训练集预测结果: {(predictions_train == y_train).mean()}")
+    for i, (pred, exp, true) in enumerate(zip(predictions_train[:5], explanations_train[:5], y_train[:5])):
+        print(f"\n样本 {i+1}:")
+        print(f"真实类别: {true}")
+        print(f"预测类别: {pred}")
+        print(f"解释: {exp}")
+    print()
+    print(f"测试集预测结果: {(predictions_test == y_test).mean()}")
+    for i, (pred, exp, true) in enumerate(zip(predictions_test[:5], explanations_test[:5], y_test[:5])):
+        print(f"\n样本 {i+1}:")
+        print(f"真实类别: {true}")
+        print(f"预测类别: {pred}")
+        print(f"解释: {exp}")
 
-    # show all rules
-    print("\n所有规则:")
-    # print the branches_df
-    print(branches_df.head(12))
+    # # show all rules
+    # print("\n所有规则:")
+    # # print the branches_df
+    # print(branches_df.head(12))
 
 if __name__ == "__main__":
     run_demo()
