@@ -4,6 +4,10 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 from scipy.stats import entropy
+from scipy.optimize import linear_sum_assignment
+def print_matrix(matrix):
+    for row in matrix:
+        print(" ".join(f"{cell:.2f}" for cell in row))
 
 # 1. 简化版的Branch类 - 用于存储和管理单个规则
 class SimpleBranch:
@@ -500,7 +504,7 @@ def compare_trees(tree1, tree2, feature_names, classes_, bounds):
     bounds: list[(float, float)]
     """
     # 比较两个 branch 的structural similarity
-    def compare_branches(branch1, branch2, not_match_label=-1000):
+    def compare_branches(branch1, branch2, not_match_label=-np.inf):
         """比较两个 branch 的structural similarity，注意这里branch不是SimpleBranch，是df的行
         branch1: pd.Series
         branch2: pd.Series
@@ -559,22 +563,34 @@ def compare_trees(tree1, tree2, feature_names, classes_, bounds):
             similarity_matrix[i, j] = compare_branches(branches1.iloc[i], branches2.iloc[j])
     
     # 使用匈牙利算法进行匹配
-    from scipy.optimize import linear_sum_assignment
-    row_ind, col_ind = linear_sum_assignment(-1 * similarity_matrix) # minimize the cost matrix
-
+    print_matrix(similarity_matrix) # shape of similarity_matrix: (len(branches1), len(branches2))
+    row_ind, col_ind = [], []
+    try:
+        row_ind, col_ind = linear_sum_assignment(-1 * similarity_matrix) # minimize the cost matrix
+    except:
+        print("匈牙利算法匹配失败，尝试使用惩罚矩阵")
+        M, N = similarity_matrix.shape
+        unmatched_cost = 0
+        penalty_matrix = np.full((M, M), -np.inf)
+        np.fill_diagonal(penalty_matrix, unmatched_cost)
+        augmented_matrix = np.hstack((similarity_matrix, penalty_matrix)) # 将 penalty_matrix 添加到 similarity_matrix 的右侧
+        row_ind, col_ind = linear_sum_assignment(-1 * augmented_matrix) # 使用匈牙利算法进行匹配
     # 计算 unmapped branches
     unmapped_branches1_indices = set()
     unmapped_branches2_indices = set()
+    # 去掉 penalty_matrix 的影响
+    new_row_ind, new_col_ind = [], []
     for r,c in zip(row_ind, col_ind):
-        if similarity_matrix[r, c] <= 0:
+        if c < len(branches2):
+            new_row_ind.append(r)
+            new_col_ind.append(c)
+        else:
             unmapped_branches1_indices.add(r)
-            unmapped_branches2_indices.add(c)
-            row_ind = row_ind[np.where(row_ind != r)]
-            col_ind = col_ind[np.where(col_ind != c)]
-    print(similarity_matrix)
+    row_ind, col_ind = new_row_ind, new_col_ind
+    unmapped_branches1_indices.update(set(range(len(branches1))) - set(row_ind))  
+    unmapped_branches2_indices.update(set(range(len(branches2))) - set(col_ind))
     print(row_ind, col_ind)
     print(unmapped_branches1_indices, unmapped_branches2_indices)
-
     # 用最大可能相似度，近似计算 unmapped branches 的损失
     penalty = 0
     for i in unmapped_branches1_indices:
@@ -670,8 +686,8 @@ def run_demo():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
     # 模拟3个客户端的数据
-    print("\n模拟3个客户端的数据...")
     num_clients = 2 
+    print(f"\n模拟{num_clients}个客户端的数据...")
     client_data = []
     for i in range(num_clients):
         idx = np.random.choice(len(X_train), size=len(X_train)//num_clients, replace=False)
@@ -680,7 +696,7 @@ def run_demo():
     # 在每个客户端训练决策树
     print("\n在各客户端训练决策树...")
     client_trees = []
-    tree_depth = 1
+    tree_depth = 3
     for i, (X_c, y_c) in enumerate(client_data):
         tree = DecisionTreeClassifier(max_depth=tree_depth, random_state=42+i)
         tree.fit(X_c, y_c)
@@ -748,5 +764,4 @@ def run_demo():
     print(branches_df.head(12))
 
 if __name__ == "__main__":
-    run_demo()
     run_demo()
