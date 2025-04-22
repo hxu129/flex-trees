@@ -107,9 +107,10 @@ class ConjunctionSet:
             list: list with the branches generated
         """
         if model_type == DecisionTreeClassifier:
-            print("AQUÍr")
+            print("DecisionTreeClassifier")
             return self.get_tree_branches_cart(tree_.tree_, tree_index)
         elif model_type == ID3Classifier:
+            print("ID3Classifier")
             return self.get_tree_branches_id3(tree_, tree_index)
         elif model_type == C45Tree:
             print("C45Tree")
@@ -270,8 +271,8 @@ class ConjunctionSet:
         conjunctionSet = self.branches_lists[0]
         excluded_branches = []
         self.__global_CS.extend(conjunctionSet)
-        # Si se utiliza un Random Forest entrará en el for, buscando ampliar el conjunto de reglas. Por ahora
-        # solo se obtiene del árbol de decisión local del cliente.
+        # If a Random Forest is used, it will enter the for, looking to expand the set of rules. For now,
+        # only the local decision tree of the client is obtained.
         if isinstance(self.model_estimators, RandomForestClassifier):
             print("Aggregating rules from forest in client")
             for i, branch_list in enumerate(self.branches_lists[1:]):
@@ -312,11 +313,11 @@ class ConjunctionSet:
                     + str(len(conjunctionSet))
                     + " conjunctions"
                 )
-                print('\nLas reglas actuales son: ')
+                print('\nThe current rules are: ')
                 # breakpoint()
                 # for branch in conjunctionSet:
                 #     print(branch.toString())
-                # print('\nLas reglas que se van a juntar son las siguientes: \n')
+                # print('\nThe rules that will be joined are: \n')
                 # for branch in branch_list:
                 #     print(branch.toString())
                 filter = False if i == len(self.branches_lists[i + 1 :]) else True
@@ -576,7 +577,7 @@ class ConjunctionSet:
 
     def filter_conjunction_set_aggregator(self, cs):
         """
-        Misma funcionalidad que filter_conjunction_set, pero esta utiliza menos probabilidades de entre las disponibles.
+        Same functionality as filter_conjunction_set, but this uses less probabilities of the available ones.
         """
         if len(cs) <= self.amount_of_branches_threshold:
             return cs
@@ -607,7 +608,7 @@ class ConjunctionSet:
             self.set_ecdf(original_data)
 
     def print_branches_probability(self):
-        print("MOSTRANDO BRANCHES PROBABILITY EN LOS CLIENTES.")
+        print("Showing branches probability in clients.")
         if isinstance(self.conjunctionSet, list):
             for branch in self.conjunctionSet:
                 print(branch.get_branch_probability())

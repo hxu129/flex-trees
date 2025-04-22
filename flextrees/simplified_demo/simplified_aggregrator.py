@@ -716,6 +716,7 @@ def run_demo():
         client_trees.append(tree)
         print(f"客户端 {i+1} 训练完成，正确率: {tree.score(X_c, y_c):.4f}")
 
+
     # 计算每个客户端的树的structural similarity
     print("\n计算每个客户端的树的structural similarity...")
     client_similarity = []

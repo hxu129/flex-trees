@@ -161,6 +161,7 @@ data/
 *.csv
 *.xls
 *.png
+*.pdf
 
 # Experimental files
 main_fedid3.py
