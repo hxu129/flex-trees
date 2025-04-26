@@ -326,7 +326,7 @@ def compare_trees(tree1, tree2, feature_names, classes_, bounds, comp_dist=False
     tree2: list[list[int]]
     feature_names: list[str]
     classes_: list[str]
-    bounds: list[(float, float)]
+    bounds: list[(float, float)] the bounds of the features; note that they should be in the same order as the feature_names
     comp_dist: bool, 是否计算标签分布差异
     dist_weight: float, 标签分布差异的权重
     """
