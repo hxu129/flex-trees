@@ -110,12 +110,12 @@ class SimpleBranch:
         return result
 
 class SimpleConjunctionSet:
-    def __init__(self, feature_names=None, amount_of_branches_threshold=100):
-        self.feature_names = feature_names
-        self.amount_of_branches_threshold = amount_of_branches_threshold
-        self.branches_lists = []
-        self.conjunctionSet = []
-        self.classes_ = None
+    def __init__(self, feature_names=None, amount_of_branches_threshold=np.inf):
+        self.feature_names = feature_names # 特征名称
+        self.amount_of_branches_threshold = amount_of_branches_threshold # 如果规则太多，进行过滤
+        self.branches_lists = [] # 规则集列表
+        self.conjunctionSet = [] # 最终的规则集
+        self.classes_ = None # 类别名称
     
     def aggregate_branches(self, client_cs, classes_):
         """聚合多个客户端的规则集合，用来由多个branch生成一个conjunctionSet的后续branch
@@ -183,15 +183,15 @@ class SimpleConjunctionSet:
                         new_conjunction_set.append(b1.merge_branch(b2))
             
             conjunctionSet = new_conjunction_set
+        
+            # 移除重复规则
+            conjunctionSet = self._remove_duplicate_branches(conjunctionSet)
             
             # 如果规则太多，进行过滤
             if len(conjunctionSet) > self.amount_of_branches_threshold:
                 conjunctionSet = self._filter_conjunction_set(conjunctionSet)
                 print(f"规则数量太多，过滤后剩余: {len(conjunctionSet)}")
         
-        # 移除重复规则
-        # TODO：应该先去重复，然后再过滤
-        self.conjunctionSet = self._remove_duplicate_branches(conjunctionSet)
         print(f"最终规则数: {len(self.conjunctionSet)}")
     
     def _filter_conjunction_set(self, cs):
@@ -315,7 +315,7 @@ def extract_rules_from_bfs_tree(bfs_tree, feature_names, classes_):
 def extract_df_rules_from_tree(tree, feature_names, classes_):
     """从决策树提取规则"""
     branches = extract_rules_from_bfs_tree(tree, feature_names, classes_)
-    cs = SimpleConjunctionSet(feature_names=feature_names, amount_of_branches_threshold=len(branches))
+    cs = SimpleConjunctionSet(feature_names=feature_names, amount_of_branches_threshold=np.inf)
     cs.aggregate_branches([branches], classes_)
     cs.buildConjunctionSet()
     return cs.get_conjunction_set_df()
