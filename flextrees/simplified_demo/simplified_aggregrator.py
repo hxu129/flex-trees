@@ -647,9 +647,9 @@ def extract_rules_from_tree(tree, feature_names, classes_):
     # 处理每个叶节点
     for leaf_idx in leaf_indices:
         # 获取叶节点样本的类别概率
-        n_samples = tree_.n_node_samples[leaf_idx]
-        value = tree_.value[leaf_idx][0]
-        probas = value / value.sum()
+        n_samples = tree_.n_node_samples[leaf_idx] # 叶节点样本数量
+        value = tree_.value[leaf_idx][0] # 叶节点样本的类别概率
+        probas = value / value.sum() # 归一化概率
         
         # 创建分支
         branch = SimpleBranch(
