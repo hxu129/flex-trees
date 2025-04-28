@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.optimize import linear_sum_assignment
-from sklearn.metrics import jensenshannon
+from scipy.spatial.distance import jensenshannon
 import pandas as pd
 
 class SimpleBranch:
@@ -192,6 +192,8 @@ class SimpleConjunctionSet:
                 conjunctionSet = self._filter_conjunction_set(conjunctionSet)
                 print(f"规则数量太多，过滤后剩余: {len(conjunctionSet)}")
         
+        # Save the final conjunctionSet
+        self.conjunctionSet = conjunctionSet
         print(f"最终规则数: {len(self.conjunctionSet)}")
     
     def _filter_conjunction_set(self, cs):
@@ -236,43 +238,33 @@ class SimpleConjunctionSet:
         return pd.DataFrame(branches_dicts).round(decimals=5)
 
 def extract_rules_from_bfs_tree(bfs_tree, feature_names, classes_):
-    """
-    Extract rules from a tree organized in BFS format
-    
-    Parameters:
-    -----------
-    bfs_tree : list of lists
-        Each inner list is a node in format [a, b, c, d, e, f]
-        where b indicates if node is leaf (1) or internal (0),
-        c is the feature index, and d is the threshold
-    feature_names : list
-        Names of features
-    classes_ : list
-        Class labels
-    
-    Returns:
-    --------
-    list of SimpleBranch objects
-    """
-    # Find all leaf nodes
+    """Extract rules from a tree organized in BFS format"""
+    # Find all leaf nodes - with numpy compatibility
     leaf_indices = [
         i for i, node in enumerate(bfs_tree)
-        if node[1] == 1  # Check if it's a leaf node
-        # TODO: modify the index for the correct flag
+        if isinstance(node, (list, np.ndarray)) and len(node) > 0 and node[0] == 1
     ]
     
     branches = []
     
     # For each leaf node
     for leaf_idx in leaf_indices:
-        # For simplicity, we're setting uniform class probabilities
-        # You may need to adjust this based on your actual data
+        # Get the class probabilities from the leaf node (indices 5,6,7)
+        if len(bfs_tree[leaf_idx]) >= 8:
+            probas = bfs_tree[leaf_idx][5:] # Starting from index 5 there are the probabilities
+        else:
+            probas = []
+        
+        # If no valid probabilities, use uniform distribution
+        if probas is None or len(probas) == 0:
+            probas = [1.0 / len(classes_)] * len(classes_)
 
-        # TODO: the label probas should be the probability of the leaf node
-        probas = [1.0 / len(classes_)] * len(classes_) # 叶节点样本的类别概率 (distribution of the leaf node)
-        # TODO: the number of samples should be the number of samples of the leaf node
-        # n_samples = bfs_tree[leaf_idx][4]
-        n_samples = 1 # 叶节点样本数量
+        # If nan is in the probas, raise an error
+        if any(np.isnan(probas)):
+            raise ValueError("NaN found in probabilities")
+        
+        # TODO: 在未来我们可能可以根据其他的性质来确定到达这个branch的样本数量
+        n_samples = 1  # Default number of samples
         
         # Create branch
         branch = SimpleBranch(
@@ -291,9 +283,9 @@ def extract_rules_from_bfs_tree(bfs_tree, feature_names, classes_):
             is_left_child = (node_id == 2 * parent_id + 1)
             
             # Get parent's feature and threshold
-            # TODO: modify the index for the correct feature and threshold
-            feature = bfs_tree[parent_id][2]
-            threshold = bfs_tree[parent_id][3]
+            feature = bfs_tree[parent_id][1]
+            threshold = bfs_tree[parent_id][2]
+            
             
             # Add condition based on whether this is a left or right child
             if is_left_child:
@@ -302,7 +294,7 @@ def extract_rules_from_bfs_tree(bfs_tree, feature_names, classes_):
                 bound = "lower"  # Right child means > threshold
             
             # Add condition to branch
-            branch.add_condition(feature, threshold, bound)
+            branch.add_condition(int(feature), threshold, bound)
             
             # Move to parent
             node_id = parent_id
@@ -327,9 +319,45 @@ def compare_trees(tree1, tree2, feature_names, classes_, bounds, comp_dist=False
     feature_names: list[str]
     classes_: list[str]
     bounds: list[(float, float)] the bounds of the features; note that they should be in the same order as the feature_names
-    comp_dist: bool, 是否计算标签分布差异
+    comp_dist: bool, 是否计算标签分布差异，如果为False，那么如果两个branch的概率经过argmax后不相同，那么就认为这两个branch不匹配，条件非常严格
     dist_weight: float, 标签分布差异的权重
     """
+    # Convert trees to numpy arrays first for consistent handling
+    # This ensures all NaN values are correctly represented as np.nan
+    # TODO: in the future if the running time is too long, we may modify the convert_to_numpy function
+    def convert_to_numpy(tree):
+        """Convert tree to numpy arrays, handling both numpy and torch data types."""
+        # Try importing torch for tensor detection
+        try:
+            import torch
+            HAS_TORCH = True
+        except ImportError:
+            HAS_TORCH = False
+
+        # Check if it's a torch tensor
+        if HAS_TORCH and isinstance(tree, torch.Tensor):
+            # Convert tensor to numpy and handle potential torch.nan
+            tree_np = tree.detach().cpu().numpy()
+            return tree_np
+    
+        numpy_tree = []
+        for node in tree:
+        
+            # Convert list to numpy array and pad with NaN
+            node_array = np.full(len(node), np.nan)
+            for i, val in enumerate(node):
+                # Handle None case
+                if val is None:
+                    continue
+                
+                # Handle standard numpy/python nan case
+                if not (isinstance(val, float) and np.isnan(val)):
+                    node_array[i] = val
+                
+            numpy_tree.append(node_array)
+        return numpy_tree
+
+    
     # 比较两个 branch 的structural similarity
     def compare_branches(branch1, branch2, not_match_label=-np.inf):
         """比较两个 branch 的structural similarity，注意这里branch不是SimpleBranch，是df的行
@@ -386,12 +414,24 @@ def compare_trees(tree1, tree2, feature_names, classes_, bounds, comp_dist=False
         else:
             raise ValueError(f"Invalid bound type: {bound_type}")
 
-    branches1 = extract_df_rules_from_tree(tree1, feature_names, classes_)
-    branches2 = extract_df_rules_from_tree(tree2, feature_names, classes_)
+    # Convert trees to numpy form for consistent processing
+    np_tree1 = convert_to_numpy(tree1)
+    np_tree2 = convert_to_numpy(tree2)
+
+    branches1 = extract_df_rules_from_tree(np_tree1, feature_names, classes_)
+    branches2 = extract_df_rules_from_tree(np_tree2, feature_names, classes_)
+
+    # Handle case where there are no branches
+    if len(branches1) == 0 or len(branches2) == 0:
+        print("No branches found in one or both trees")
+        return 0.0
 
     # 对每个特征应用替换函数
     branches1 = branches1.apply(replace_inf_with_bounds)
     branches2 = branches2.apply(replace_inf_with_bounds)
+    print(branches1)
+    print(branches2)
+    print()
 
     similarity_matrix = np.zeros((len(branches1), len(branches2)))
     for i in range(len(branches1)):
@@ -424,6 +464,7 @@ def compare_trees(tree1, tree2, feature_names, classes_, bounds, comp_dist=False
     row_ind, col_ind = new_row_ind, new_col_ind
     unmapped_branches1_indices.update(set(range(len(branches1))) - set(row_ind))  
     unmapped_branches2_indices.update(set(range(len(branches2))) - set(col_ind))
+    print(similarity_matrix)
     print(row_ind, col_ind)
     print(unmapped_branches1_indices, unmapped_branches2_indices)
     # 用最大可能相似度，近似计算 unmapped branches 的损失
@@ -444,5 +485,29 @@ def compare_trees(tree1, tree2, feature_names, classes_, bounds, comp_dist=False
     return average_similarity
 
 
-# def convert_trees(tree: List[List[int]]) -> 
-# """This module extract rules from trees in BFS format"""
+
+if __name__ == "__main__":
+    # bound 貌似是(0, 1)，你暂且就按照全是(0,1)来处理但也要能处理nan
+    class_str = ['c1','c2','c3']
+    feature_names = ['x1','x2','x3','x4','x5'] #(最后三个features是分类的probability)
+    tree1 = [[0, 3, 0.3, -1, 0, np.nan, np.nan, np.nan],  # 最好也支持tensor和含有torch.nan的tensor
+            [1, -1, -1, -1, 0, 0.1, 0.2, 0.7], 
+            [0, 3, 0.7, -1, 0, np.nan, np.nan, np.nan],  
+            [np.nan, np.nan, np.nan, np.nan, np.nan], 
+            [np.nan, np.nan, np.nan, np.nan, np.nan], 
+            [1, -1, -1, -1, 0, 0.2, 0.3, 0.5],
+            [1, -1, -1, -1, 0, 0.4, 0.5, 0.1],
+            [np.nan, np.nan, np.nan, np.nan, np.nan], 
+            [np.nan, np.nan, np.nan, np.nan, np.nan], 
+            [0, np.nan, np.nan, np.nan, np.nan]] 
+    tree2 = [[0, 3, 0.3, -1, 0, np.nan, np.nan, np.nan], 
+            [1, -1, -1, -1, 0, 0.6, 0.2, 0.2], 
+            [1, -1, -1, -1, 0, 0.3, 0.3, 0.4],
+            [np.nan, np.nan, np.nan, np.nan, np.nan], 
+            [np.nan, np.nan, np.nan, np.nan, np.nan], 
+            [np.nan, np.nan, np.nan, np.nan, np.nan], 
+            [np.nan, np.nan, np.nan, np.nan, np.nan], 
+            [np.nan, np.nan, np.nan, np.nan, np.nan], 
+            [np.nan, np.nan, np.nan, np.nan, np.nan], 
+            [0, np.nan, np.nan, np.nan, np.nan]]
+    print(compare_trees(tree1, tree2, feature_names, class_str, [(0, 1), (0, 1), (0, 1), (0, 1), (0, 1)], comp_dist=True, dist_weight=0.5))
