@@ -1,0 +1,398 @@
+[
+  [
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter >1 cm"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [
+        "drug therapy US-FNAB"
+      ],
+      "logical_rel": "and"
+    },
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter \u22641 cm"
+      ],
+      "logical_rel": "null"
+    },
+    null,
+    null,
+    {
+      "role": "D",
+      "triples": [
+        "therapeutic schedule US-FNAB is not recommended"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [],
+      "logical_rel": "null"
+    }
+  ],
+  [
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter >1 cm"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [
+        "drug therapy US-FNAB"
+      ],
+      "logical_rel": "and"
+    },
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter \u22641 cm"
+      ],
+      "logical_rel": "null"
+    },
+    null,
+    null,
+    {
+      "role": "D",
+      "triples": [
+        "therapeutic schedule US-FNAB is not recommended"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [],
+      "logical_rel": "null"
+    }
+  ],
+  [
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter >1 cm"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [
+        "drug therapy US-FNAB"
+      ],
+      "logical_rel": "and"
+    },
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter \u22641 cm"
+      ],
+      "logical_rel": "null"
+    },
+    null,
+    null,
+    {
+      "role": "D",
+      "triples": [
+        "therapeutic schedule US-FNAB is not recommended"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [],
+      "logical_rel": "null"
+    }
+  ],
+  [
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter >1 cm"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [
+        "drug therapy US-FNAB"
+      ],
+      "logical_rel": "and"
+    },
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter \u22641 cm"
+      ],
+      "logical_rel": "null"
+    },
+    null,
+    null,
+    {
+      "role": "D",
+      "triples": [
+        "therapeutic schedule US-FNAB is not recommended"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [],
+      "logical_rel": "null"
+    }
+  ],
+  [
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter >1 cm"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [
+        "drug therapy US-FNAB"
+      ],
+      "logical_rel": "and"
+    },
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter \u22641 cm"
+      ],
+      "logical_rel": "null"
+    },
+    null,
+    null,
+    {
+      "role": "D",
+      "triples": [
+        "therapeutic schedule US-FNAB is not recommended"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [],
+      "logical_rel": "null"
+    }
+  ],
+  [
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter >1 cm"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [
+        "drug therapy US-FNAB"
+      ],
+      "logical_rel": "and"
+    },
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter \u22641 cm"
+      ],
+      "logical_rel": "null"
+    },
+    null,
+    null,
+    {
+      "role": "D",
+      "triples": [
+        "therapeutic schedule US-FNAB is not recommended"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [],
+      "logical_rel": "null"
+    }
+  ],
+  [
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter >1 cm"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [
+        "drug therapy US-FNAB"
+      ],
+      "logical_rel": "and"
+    },
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter \u22641 cm"
+      ],
+      "logical_rel": "null"
+    },
+    null,
+    null,
+    {
+      "role": "D",
+      "triples": [
+        "therapeutic schedule US-FNAB is not recommended"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [],
+      "logical_rel": "null"
+    }
+  ],
+  [
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter >1 cm"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [
+        "drug therapy US-FNAB"
+      ],
+      "logical_rel": "and"
+    },
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter \u22641 cm"
+      ],
+      "logical_rel": "null"
+    },
+    null,
+    null,
+    {
+      "role": "D",
+      "triples": [
+        "therapeutic schedule US-FNAB is not recommended"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [],
+      "logical_rel": "null"
+    }
+  ],
+  [
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter >1 cm"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "C",
+      "triples": [
+        "dummy_feature_7"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter \u22641 cm"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [
+        "drug therapy US-FNAB"
+      ],
+      "logical_rel": "and"
+    },
+    {
+      "role": "C",
+      "triples": [
+        "dummy_feature_9"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [],
+      "logical_rel": "null"
+    },
+    null,
+    null,
+    null,
+    null,
+    {
+      "role": "D",
+      "triples": [],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [
+        "therapeutic schedule US-FNAB is not recommended"
+      ],
+      "logical_rel": "null"
+    }
+  ],
+  [
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter >1 cm"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [
+        "drug therapy US-FNAB"
+      ],
+      "logical_rel": "and"
+    },
+    {
+      "role": "C",
+      "triples": [
+        "clinical manifestation diameter \u22641 cm"
+      ],
+      "logical_rel": "null"
+    },
+    null,
+    null,
+    {
+      "role": "D",
+      "triples": [
+        "therapeutic schedule US-FNAB is not recommended"
+      ],
+      "logical_rel": "null"
+    },
+    {
+      "role": "D",
+      "triples": [],
+      "logical_rel": "null"
+    }
+  ]
+]
